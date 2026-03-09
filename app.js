@@ -10,7 +10,7 @@ const clearBtn = document.getElementById("clearBtn");
 
 function setStatus(message, type = "info") {
   statusBox.textContent = message;
-  statusBox.className = `status-box ${type}`;
+  statusBox.className = `status ${type}`;
 }
 
 function createSkeletonCards(count = 8) {
@@ -33,7 +33,7 @@ function createSkeletonCards(count = 8) {
 
 function getPosterUrl(poster) {
   if (!poster || poster === "N/A") {
-    return "https://via.placeholder.com/600x900/140d11/f7f4ef?text=No+Poster";
+    return "https://placehold.co/600x900/140d11/f7f4ef?text=No+Poster";
   }
   return poster;
 }
@@ -77,19 +77,21 @@ function createMovieCard(movie, rating = "N/A") {
 }
 
 async function searchMovies(query) {
-  if (!query.trim()) {
+  const trimmedQuery = query.trim();
+
+  if (!trimmedQuery) {
     setStatus("Lütfen bir film adı gir.", "error");
     moviesGrid.innerHTML = "";
-    resultsTitle.textContent = "Popüler Arama Denemeleri";
+    resultsTitle.textContent = "Aramak için bir film adı yaz";
     return;
   }
 
   try {
-    setStatus(`"${query}" için sonuçlar aranıyor...`, "info");
-    resultsTitle.textContent = `"${query}" için sonuçlar`;
+    setStatus(`"${trimmedQuery}" için sonuçlar aranıyor...`, "info");
+    resultsTitle.textContent = `"${trimmedQuery}" için sonuçlar`;
     createSkeletonCards();
 
-    const searchUrl = `${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}`;
+    const searchUrl = `${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(trimmedQuery)}`;
     const response = await fetch(searchUrl);
     const data = await response.json();
 
@@ -104,15 +106,17 @@ async function searchMovies(query) {
     }
 
     const movies = data.Search.slice(0, 8);
+
     const detailedMovies = await Promise.all(
       movies.map(async (movie) => {
         try {
           const details = await fetchMovieDetails(movie.imdbID);
           return {
             ...movie,
-            imdbRating: details.imdbRating && details.imdbRating !== "N/A"
-              ? details.imdbRating
-              : "N/A",
+            imdbRating:
+              details.imdbRating && details.imdbRating !== "N/A"
+                ? details.imdbRating
+                : "N/A",
           };
         } catch {
           return {
@@ -142,8 +146,8 @@ async function searchMovies(query) {
 function clearResults() {
   searchInput.value = "";
   moviesGrid.innerHTML = "";
-  resultsTitle.textContent = "Popüler Arama Denemeleri";
-  setStatus("Aramak için bir film adı yaz.", "info");
+  resultsTitle.textContent = "Aramak için bir film adı yaz";
+  setStatus("Film araması yapmaya hazırsın.", "info");
 }
 
 searchForm.addEventListener("submit", (event) => {
