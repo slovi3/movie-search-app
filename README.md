@@ -16,5 +16,5 @@ Minimal modern tasarıma sahip film arama uygulaması. OMDb API kullanarak film 
 - JavaScript
 - OMDb API
 
-## Live
-(Deploy sonrası eklenecek)
+## Live Demo
+https://slovi3.github.io/mini-2026-03-09-movie-search-app/
