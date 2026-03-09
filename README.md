@@ -1,5 +1,7 @@
-# Movie Search App
+## Live Demo
+https://slovi3.github.io/movie-search-app/
 
+# Movie Search App
 Minimal modern tasarıma sahip film arama uygulaması. OMDb API kullanarak film sonuçlarını poster kartları halinde listeler.
 
 ## Features
@@ -17,4 +19,4 @@ Minimal modern tasarıma sahip film arama uygulaması. OMDb API kullanarak film 
 - OMDb API
 
 ## Live Demo
-https://slovi3.github.io/mini-2026-03-09-movie-search-app/
+https://slovi3.github.io/movie-search-app/
