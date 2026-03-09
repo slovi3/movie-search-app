@@ -1,77 +1,87 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="tr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie Search App</title>
-    <link rel="stylesheet" href="./style.css" />
-  </head>
-  <body>
-    <div class="bg-glow glow-1"></div>
-    <div class="bg-glow glow-2"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movie Search App</title>
 
-    <main class="app-shell">
-      <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">Project 03 • 09.03.2026</p>
-          <h1>Movie Search</h1>
-          <p class="hero-text">
-            Film ara, posterleri incele ve hızlıca sonuçları gör.
-            Minimal modern arayüz + büyük poster kartları.
-          </p>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <main class="page">
+    <section class="hero">
+      <span class="badge">Mini Project 03</span>
+
+      <h1>Movie Search App</h1>
+      <p class="hero-text">
+        Film ara, posterları incele, IMDb puanını gör. Sinematik ve modern bir arayüzle
+        favori filmlerini hızlıca keşfet.
+      </p>
+
+      <form class="search-card" id="searchForm">
+        <div class="search-input-wrap">
+          <span class="search-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"></circle>
+              <path d="M16 16L21 21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"></path>
+            </svg>
+          </span>
+
+          <input
+            type="text"
+            id="searchInput"
+            placeholder="Film adı yaz... örnek: Interstellar"
+            autocomplete="off"
+          />
         </div>
 
-        <div class="hero-badge">
-          <span class="badge-dot"></span>
-          <span>Vanilla JS • OMDb API</span>
+        <button type="submit" class="search-btn">Ara</button>
+      </form>
+
+      <div class="hero-stats">
+        <div class="stat-box">
+          <span>Arama</span>
+          <strong>Hızlı Sonuç</strong>
         </div>
-      </header>
-
-      <section class="search-panel">
-        <form id="searchForm" class="search-form">
-          <div class="search-input-wrap">
-            <input
-              id="searchInput"
-              type="text"
-              placeholder="Örn: Batman, Interstellar, Fight Club..."
-              autocomplete="off"
-            />
-          </div>
-
-          <button id="searchBtn" class="search-btn" type="submit">
-            Search
-          </button>
-        </form>
-
-        <div class="search-meta">
-          <p id="statusText" class="status-text">Hazır. Bir film adı yaz ve ara.</p>
+        <div class="stat-box">
+          <span>Tema</span>
+          <strong>Cinematic UI</strong>
         </div>
-      </section>
-
-      <section id="resultsSection" class="results-section">
-        <div id="emptyState" class="empty-state">
-          <h2>Henüz arama yapılmadı</h2>
-          <p>Yukarıdan bir film adı aratarak başlayabilirsin.</p>
+        <div class="stat-box">
+          <span>Veri</span>
+          <strong>OMDb API</strong>
         </div>
+      </div>
+    </section>
 
-        <div id="loadingState" class="loading-grid hidden">
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
-          <div class="skeleton-card"></div>
+    <section class="results-section">
+      <div class="results-top">
+        <div>
+          <p class="results-label">Search Results</p>
+          <h2 id="resultsTitle">Popüler Arama Denemeleri</h2>
         </div>
+        <button id="clearBtn" class="clear-btn" type="button">Temizle</button>
+      </div>
 
-        <div id="errorState" class="error-state hidden">
-          <h2>Bir sorun oluştu</h2>
-          <p id="errorText">Sonuç alınamadı.</p>
-        </div>
+      <div id="statusBox" class="status-box info">
+        Aramak için bir film adı yaz.
+      </div>
 
-        <div id="resultsGrid" class="results-grid hidden"></div>
-      </section>
-    </main>
+      <div id="moviesGrid" class="movies-grid"></div>
+    </section>
+  </main>
 
-    <script src="./app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
 </html>

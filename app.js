@@ -1,110 +1,154 @@
 const API_KEY = "4fa07907";
+const BASE_URL = "https://www.omdbapi.com/";
 
 const searchForm = document.getElementById("searchForm");
 const searchInput = document.getElementById("searchInput");
-const statusText = document.getElementById("statusText");
+const moviesGrid = document.getElementById("moviesGrid");
+const statusBox = document.getElementById("statusBox");
+const resultsTitle = document.getElementById("resultsTitle");
+const clearBtn = document.getElementById("clearBtn");
 
-const emptyState = document.getElementById("emptyState");
-const loadingState = document.getElementById("loadingState");
-const errorState = document.getElementById("errorState");
-const errorText = document.getElementById("errorText");
-const resultsGrid = document.getElementById("resultsGrid");
-
-function setView(view) {
-  emptyState.classList.add("hidden");
-  loadingState.classList.add("hidden");
-  errorState.classList.add("hidden");
-  resultsGrid.classList.add("hidden");
-
-  if (view === "empty") emptyState.classList.remove("hidden");
-  if (view === "loading") loadingState.classList.remove("hidden");
-  if (view === "error") errorState.classList.remove("hidden");
-  if (view === "results") resultsGrid.classList.remove("hidden");
+function setStatus(message, type = "info") {
+  statusBox.textContent = message;
+  statusBox.className = `status-box ${type}`;
 }
 
-function escapeHtml(text) {
-  return String(text)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#039;");
+function createSkeletonCards(count = 8) {
+  moviesGrid.innerHTML = "";
+
+  for (let i = 0; i < count; i++) {
+    const skeleton = document.createElement("div");
+    skeleton.className = "movie-card loading";
+    skeleton.innerHTML = `
+      <div class="poster-wrap"></div>
+      <div class="movie-body">
+        <div style="height:18px;background:rgba(255,255,255,0.06);border-radius:8px;margin-bottom:10px;"></div>
+        <div style="height:14px;background:rgba(255,255,255,0.05);border-radius:8px;margin-bottom:14px;width:70%;"></div>
+        <div style="height:44px;background:rgba(255,255,255,0.06);border-radius:14px;"></div>
+      </div>
+    `;
+    moviesGrid.appendChild(skeleton);
+  }
 }
 
-function createMovieCard(movie) {
-  const title = escapeHtml(movie.Title || "Unknown Title");
-  const year = escapeHtml(movie.Year || "N/A");
-  const type = escapeHtml(movie.Type || "movie");
+function getPosterUrl(poster) {
+  if (!poster || poster === "N/A") {
+    return "https://via.placeholder.com/600x900/140d11/f7f4ef?text=No+Poster";
+  }
+  return poster;
+}
 
-  const posterHtml =
-    movie.Poster && movie.Poster !== "N/A"
-      ? `<img src="${movie.Poster}" alt="${title} poster" loading="lazy" />`
-      : `<div class="poster-fallback">Poster bulunamadı</div>`;
+async function fetchMovieDetails(imdbID) {
+  const url = `${BASE_URL}?apikey=${API_KEY}&i=${imdbID}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
+}
+
+function createMovieCard(movie, rating = "N/A") {
+  const poster = getPosterUrl(movie.Poster);
 
   return `
     <article class="movie-card">
       <div class="poster-wrap">
-        ${posterHtml}
+        <img src="${poster}" alt="${movie.Title} poster" loading="lazy" />
+        <div class="rating-badge">${rating}</div>
       </div>
+
       <div class="movie-body">
-        <h3 class="movie-title">${title}</h3>
+        <h3 class="movie-title">${movie.Title}</h3>
+
         <div class="movie-meta">
-          <span>${year}</span>
-          <span>${type}</span>
+          <span>${movie.Year}</span>
+          <span class="movie-type">${movie.Type}</span>
         </div>
+
+        <a
+          class="movie-link"
+          href="https://www.imdb.com/title/${movie.imdbID}/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          IMDb'de Aç
+        </a>
       </div>
     </article>
   `;
 }
 
 async function searchMovies(query) {
-  const url = `https://www.omdbapi.com/?apikey=${API_KEY}&s=${encodeURIComponent(query)}`;
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Ağ hatası oluştu.");
-  }
-
-  const data = await response.json();
-
-  if (data.Response === "False") {
-    throw new Error(data.Error || "Sonuç bulunamadı.");
-  }
-
-  return data.Search || [];
-}
-
-searchForm.addEventListener("submit", async (event) => {
-  event.preventDefault();
-
-  const query = searchInput.value.trim();
-
-  if (!query) {
-    setView("error");
-    errorText.textContent = "Lütfen bir film adı gir.";
-    statusText.textContent = "Arama yapılmadı.";
+  if (!query.trim()) {
+    setStatus("Lütfen bir film adı gir.", "error");
+    moviesGrid.innerHTML = "";
+    resultsTitle.textContent = "Popüler Arama Denemeleri";
     return;
   }
 
-  setView("loading");
-  statusText.textContent = `"${query}" için sonuçlar getiriliyor...`;
-
   try {
-    const movies = await searchMovies(query);
+    setStatus(`"${query}" için sonuçlar aranıyor...`, "info");
+    resultsTitle.textContent = `"${query}" için sonuçlar`;
+    createSkeletonCards();
 
-    if (!movies.length) {
-      setView("error");
-      errorText.textContent = "Hiç sonuç bulunamadı.";
-      statusText.textContent = "Sonuç bulunamadı.";
+    const searchUrl = `${BASE_URL}?apikey=${API_KEY}&s=${encodeURIComponent(query)}`;
+    const response = await fetch(searchUrl);
+    const data = await response.json();
+
+    if (data.Response === "False") {
+      moviesGrid.innerHTML = `
+        <div class="empty-card">
+          Sonuç bulunamadı. Farklı bir film adı dene.
+        </div>
+      `;
+      setStatus("Sonuç bulunamadı.", "error");
       return;
     }
 
-    resultsGrid.innerHTML = movies.map(createMovieCard).join("");
-    setView("results");
-    statusText.textContent = `"${query}" için ${movies.length} sonuç listelendi.`;
+    const movies = data.Search.slice(0, 8);
+    const detailedMovies = await Promise.all(
+      movies.map(async (movie) => {
+        try {
+          const details = await fetchMovieDetails(movie.imdbID);
+          return {
+            ...movie,
+            imdbRating: details.imdbRating && details.imdbRating !== "N/A"
+              ? details.imdbRating
+              : "N/A",
+          };
+        } catch {
+          return {
+            ...movie,
+            imdbRating: "N/A",
+          };
+        }
+      })
+    );
+
+    moviesGrid.innerHTML = detailedMovies
+      .map((movie) => createMovieCard(movie, movie.imdbRating))
+      .join("");
+
+    setStatus(`${detailedMovies.length} sonuç listelendi.`, "success");
   } catch (error) {
-    setView("error");
-    errorText.textContent = error.message;
-    statusText.textContent = "Bir hata oluştu.";
+    console.error(error);
+    moviesGrid.innerHTML = `
+      <div class="empty-card">
+        Bir hata oluştu. API key veya bağlantıyı kontrol et.
+      </div>
+    `;
+    setStatus("Bir hata oluştu. API key veya bağlantıyı kontrol et.", "error");
   }
+}
+
+function clearResults() {
+  searchInput.value = "";
+  moviesGrid.innerHTML = "";
+  resultsTitle.textContent = "Popüler Arama Denemeleri";
+  setStatus("Aramak için bir film adı yaz.", "info");
+}
+
+searchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  searchMovies(searchInput.value);
 });
+
+clearBtn.addEventListener("click", clearResults);
